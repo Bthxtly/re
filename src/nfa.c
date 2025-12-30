@@ -80,7 +80,7 @@ void free_nfa(NFA *nfa) {
 States *epsilon_closure(NFA *nfa, States *s) {
   States *new_s = new_states();
 
-  // add all original states to the closure first
+  /* add all original states to the closure first */
   for (size_t i = 0; i < s->len; ++i) {
     push_state(new_s, s->states[i]);
   }

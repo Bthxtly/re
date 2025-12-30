@@ -101,7 +101,7 @@ void free_ast(Ast *node) {
     return;
   switch (node->type) {
   case LiteralNode:
-    // nothing to free
+    /* nothing to free */
     break;
   case AndNode:
     free_ast(node->data->and.r1);
@@ -144,13 +144,15 @@ static void eat(Parser *parser, TokenType type) {
   }
 }
 
-// Forward declarations
+/* Forward declarations */
 static Ast *parse_expr(Parser *parser);
 static Ast *parse_term(Parser *parser);
 static Ast *parse_factor(Parser *parser);
 static Ast *parse_base(Parser *parser);
 
-// expr := term*
+/*
+ * expr := term*
+ */
 static Ast *parse_expr(Parser *parser) {
   Ast *node = parse_term(parser);
   while (parser->current_token->type == LITERAL ||
@@ -161,7 +163,9 @@ static Ast *parse_expr(Parser *parser) {
   return node;
 }
 
-// term := factor ('|' factor)*
+/*
+ * term := factor ('|' factor)*
+ */
 static Ast *parse_term(Parser *parser) {
   Ast *node = parse_factor(parser);
   while (parser->current_token->type == OR) {
@@ -172,7 +176,9 @@ static Ast *parse_term(Parser *parser) {
   return node;
 }
 
-// factor := base ('*')*
+/*
+ * factor := base ('*')*
+ */
 static Ast *parse_factor(Parser *parser) {
   Ast *node = parse_base(parser);
   while (parser->current_token->type == REPEAT) {
@@ -182,7 +188,9 @@ static Ast *parse_factor(Parser *parser) {
   return node;
 }
 
-// base := LITERAL | '(' expr ')'
+/*
+ * base := LITERAL | '(' expr ')'
+ */
 static Ast *parse_base(Parser *parser) {
   if (parser->current_token->type == LITERAL) {
     char value = parser->current_token->value;
@@ -194,18 +202,16 @@ static Ast *parse_base(Parser *parser) {
     eat(parser, RPAREN);
     return new_ast_surround(node);
   } else {
-    // Error handling: unexpected token
-    printf("unexpected trailing token at %d\n", __LINE__);
+    printf("unexpected token: %d\n", parser->current_token->type);
     exit(1);
   }
 }
 
-// Entry point for parsing
+/* Entry point for parsing */
 Ast *parse(Parser *parser) {
   Ast *node = parse_expr(parser);
   if (parser->current_token->type != END) {
-    // Error handling: unexpected trailing input
-    printf("unexpected trailing token at %d\n", __LINE__);
+    printf("unexpected trailing token: %d\n", parser->current_token->type);
     exit(1);
   }
   return node;
