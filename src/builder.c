@@ -134,7 +134,6 @@ static NFAFragment *ast2nfa_fragment(Ast *ast) {
 }
 
 NFA *ast2nfa(Ast *ast) {
-  g_state_counts = 0;
   NFAFragment *fragment = ast2nfa_fragment(ast);
   NFA *nfa = fragment->nfa;
   free(fragment);
@@ -158,5 +157,23 @@ NFA *build(char *input) {
   }
   free(lexer);
   free(parser);
+  return nfa;
+}
+
+NFA *build_many(char **inputs, size_t len) {
+  g_state_counts = 0;
+  NFA *nfa = new_nfa();
+  nfa->target_states = new_states();
+  State start = increase_state_counts();
+
+  for (size_t i = 0; i < len; ++i) {
+    State sub_start = get_state_counts();
+    NFA *sub_nfa = build(inputs[i]);
+    move_edges(nfa, sub_nfa);
+    add_epsilon(nfa, start, sub_start);
+    push_state(nfa->target_states, sub_nfa->target_states->states[0]);
+    free(sub_nfa);
+  }
+
   return nfa;
 }

@@ -1,5 +1,6 @@
 #include "../src/match.c"
 #include <assert.h>
+#include <stddef.h>
 #include <stdlib.h>
 
 void match_one_pattern() {
@@ -16,8 +17,17 @@ void match_one_pattern() {
 }
 
 void match_multiple_patterns() {
-  ;
-  ;
+  char *inputs[] = {"foo", "foooo", "fo*b"};
+  size_t len = sizeof(inputs) / sizeof(char *);
+  NFA *nfa = build_many(inputs, len);
+
+  assert(match_string(nfa, "foo"));
+  assert(match_string(nfa, "foooo"));
+  assert(match_string(nfa, "fb"));
+  assert(match_string(nfa, "foooooob"));
+  assert(!match_string(nfa, "fo"));
+  assert(!match_string(nfa, "fooo"));
+  assert(!match_string(nfa, "fbi"));
 }
 
 int main(int argc, char *argv[]) {
