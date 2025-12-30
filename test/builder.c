@@ -4,8 +4,8 @@
 #include <stdio.h>
 
 void tokenize() {
-  char *input = "fo(o|ba*r)*baz";
-  Lexer *lexer = new_lexer(input);
+  char *pattern = "fo(o|ba*r)*baz";
+  Lexer *lexer = new_lexer(pattern);
   TokenType types[] = {
       LITERAL, /* f */
       LITERAL, /* o */
@@ -33,8 +33,8 @@ void tokenize() {
 }
 
 void test_ast() {
-  char *input = "fo(o|ba*r)*baz";
-  Lexer *lexer = new_lexer(input);
+  char *pattern = "fo(o|ba*r)*baz";
+  Lexer *lexer = new_lexer(pattern);
   Parser *parser = new_parser(lexer);
   Ast *ast = parse(parser);
 

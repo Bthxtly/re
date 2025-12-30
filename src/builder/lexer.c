@@ -20,16 +20,16 @@ Token *new_token(TokenType type, char value) {
 }
 
 typedef struct Lexer {
-  char *input;
+  char *pattern;
   char *current_char;
   Token *current_token;
 } Lexer;
 
-/* create a new lexer from input string */
-Lexer *new_lexer(char *input) {
+/* create a new lexer from pattern string */
+Lexer *new_lexer(char *pattern) {
   Lexer *lexer = (Lexer *)malloc(sizeof(Lexer));
-  lexer->input = input;
-  lexer->current_char = lexer->input;
+  lexer->pattern = pattern;
+  lexer->current_char = lexer->pattern;
   lexer->current_token = NULL;
   return lexer;
 }

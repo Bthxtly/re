@@ -147,8 +147,8 @@ NFA *ast2nfa(Ast *ast) {
   return nfa;
 }
 
-NFA *build(char *input) {
-  Lexer *lexer = new_lexer(input);
+NFA *build(char *pattern) {
+  Lexer *lexer = new_lexer(pattern);
   Parser *parser = new_parser(lexer);
   Ast *ast = parse(parser);
   NFA *nfa = ast2nfa(ast);
@@ -160,7 +160,7 @@ NFA *build(char *input) {
   return nfa;
 }
 
-NFA *build_many(char **inputs, size_t len) {
+NFA *build_many(char **patterns, size_t len) {
   g_state_counts = 0;
   NFA *nfa = new_nfa();
   nfa->target_states = new_states();
@@ -168,7 +168,7 @@ NFA *build_many(char **inputs, size_t len) {
 
   for (size_t i = 0; i < len; ++i) {
     State sub_start = get_state_counts();
-    NFA *sub_nfa = build(inputs[i]);
+    NFA *sub_nfa = build(patterns[i]);
     move_edges(nfa, sub_nfa);
     add_epsilon(nfa, start, sub_start);
     push_state(nfa->target_states, sub_nfa->target_states->states[0]);

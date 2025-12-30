@@ -5,7 +5,7 @@
 char EPSILON = -1;
 
 typedef struct Edge {
-  char input;
+  char symbol;
   State from;
   State to;
 } Edge;
@@ -26,10 +26,10 @@ NFA *new_nfa() {
   return nfa;
 }
 
-/* create a new edge with given input, from, to */
-Edge *new_edge(char input, State from, State to) {
+/* create a new edge with given symbol, from, to */
+Edge *new_edge(char symbol, State from, State to) {
   Edge *e = (Edge *)malloc(sizeof(Edge));
-  e->input = input;
+  e->symbol = symbol;
   e->from = from;
   e->to = to;
   return e;
@@ -53,8 +53,8 @@ void push_edge(NFA *nfa, Edge *e) {
 void print_edges(NFA *nfa) {
   for (size_t i = 0; i < nfa->edges_count; ++i) {
     Edge *e = nfa->edges[i];
-    if (e->input != EPSILON)
-      printf("%d --%c--> %d\n", e->from, e->input, e->to);
+    if (e->symbol != EPSILON)
+      printf("%d --%c--> %d\n", e->from, e->symbol, e->to);
     else
       printf("%d --ε--> %d\n", e->from, e->to);
   }
@@ -90,7 +90,7 @@ States *epsilon_closure(NFA *nfa, States *s) {
     State state = s->states[s->len];
     for (size_t i = 0; i < nfa->edges_count; ++i) {
       Edge *e = nfa->edges[i];
-      if (e->input == EPSILON && e->from == state) {
+      if (e->symbol == EPSILON && e->from == state) {
         State next_state = e->to;
         if (!have_state(new_s, next_state)) {
           push_state(new_s, next_state);
@@ -105,13 +105,13 @@ States *epsilon_closure(NFA *nfa, States *s) {
   return new_s;
 }
 
-/* return all states reachable with given input from the given states */
-States *move(NFA *nfa, States *s, char input) {
+/* return all states reachable with given symbol from the given states */
+States *move(NFA *nfa, States *s, char symbol) {
   States *new_s = new_states();
   for (size_t i = 0; i < s->len; ++i) {
     for (size_t j = 0; j < nfa->edges_count; ++j) {
       Edge *e = nfa->edges[j];
-      if (e->input == input && e->from == s->states[i]) {
+      if (e->symbol == symbol && e->from == s->states[i]) {
         State next_state = e->to;
         if (!have_state(new_s, next_state)) {
           push_state(new_s, next_state);
