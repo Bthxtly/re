@@ -1,7 +1,6 @@
+#include "state.c"
 #include <stddef.h>
 #include <stdlib.h>
-
-#include "state.c"
 
 char EPSILON = -1;
 

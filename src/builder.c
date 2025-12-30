@@ -1,7 +1,3 @@
-/*
- * Build an NFA from a string(char*)
- */
-
 #include "builder/parser.c"
 #include "nfa.c"
 #include <stddef.h>
@@ -72,7 +68,8 @@ static NFAFragment *ast2nfa_fragment(Ast *ast) {
     NFAFragment *right = ast2nfa_fragment(ast->data->and.r2);
     move_edges(left->nfa, right->nfa);
     free(right->nfa);
-    NFAFragment *result = new_nfa_fragment(left->nfa, left->start, right->accept);
+    NFAFragment *result =
+        new_nfa_fragment(left->nfa, left->start, right->accept);
     free(left);
     free(right);
     return result;
