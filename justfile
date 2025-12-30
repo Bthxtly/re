@@ -5,17 +5,27 @@ run:
   @./a.out
   @rm a.out
 
-test_nfa:
-  @gcc test/nfa.c
-  @./a.out
-  @rm a.out
+# merge source files into one file to be embedded into other projects
+merge:
+  @./merge.sh
 
+# tests
 test_builder:
   @gcc test/builder.c
   @./a.out
   @rm a.out
 
-test: test_nfa test_builder
+test_nfa:
+  @gcc test/nfa.c
+  @./a.out
+  @rm a.out
+
+test_match:
+  @gcc test/match.c
+  @./a.out
+  @rm a.out
+
+test: test_builder test_nfa test_match
 
 default:
   echo 'Hello, world!'
