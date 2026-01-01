@@ -53,8 +53,8 @@ int main(int argc, char *argv[]) {
 
   basic_operations(nfa);
 
-  assert(match_string(nfa, "aabb"));
-  assert(!match_string(nfa, "abc"));
+  assert(match_full(nfa, "aabb"));
+  assert(!match_full(nfa, "abc"));
 
   free(nfa);
 

@@ -27,6 +27,9 @@ void push_state(States *s, State state) {
   ++(s->len);
 }
 
+/* if the states is empty */
+bool states_is_empty(States *s) { return s->len == 0; }
+
 /* if the container has the state */
 bool have_state(States *s, State state) {
   for (size_t i = 0; i < s->len; ++i)
