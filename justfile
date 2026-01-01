@@ -6,7 +6,7 @@ run:
   @rm a.out
 
 # merge source files into one file to be embedded into other projects
-merge:
+merge: test # test before merge
   @./merge.sh
 
 # tests
