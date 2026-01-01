@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 char EPSILON = -1;
+char ANY = -2;
 
 typedef struct Edge {
   char symbol;
@@ -53,10 +54,12 @@ void push_edge(NFA *nfa, Edge *e) {
 void print_edges(NFA *nfa) {
   for (size_t i = 0; i < nfa->edges_count; ++i) {
     Edge *e = nfa->edges[i];
-    if (e->symbol != EPSILON)
-      printf("%d --%c--> %d\n", e->from, e->symbol, e->to);
-    else
+    if (e->symbol == EPSILON)
       printf("%d --ε--> %d\n", e->from, e->to);
+    else if (e->symbol == ANY)
+      printf("%d --¤--> %d\n", e->from, e->to);
+    else
+      printf("%d --%c--> %d\n", e->from, e->symbol, e->to);
   }
 }
 
@@ -111,7 +114,8 @@ States *move(NFA *nfa, States *s, char symbol) {
   for (size_t i = 0; i < s->len; ++i) {
     for (size_t j = 0; j < nfa->edges_count; ++j) {
       Edge *e = nfa->edges[j];
-      if (e->symbol == symbol && e->from == s->states[i]) {
+      if ((e->symbol == ANY || e->symbol == symbol) &&
+          e->from == s->states[i]) {
         State next_state = e->to;
         if (!have_state(new_s, next_state)) {
           push_state(new_s, next_state);

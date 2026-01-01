@@ -4,7 +4,17 @@
  * Lexer
  */
 
-typedef enum TokenType { LPAREN, RPAREN, REPEAT, OR, LITERAL, END } TokenType;
+typedef enum TokenType {
+  LPAREN,
+  RPAREN,
+  DASH,
+  DOT,
+  ONE_OR_MORE,
+  REPEAT,
+  OR,
+  LITERAL,
+  END
+} TokenType;
 
 typedef struct Token {
   TokenType type;
@@ -39,18 +49,34 @@ Token *get_next_token(Lexer *lexer) {
     free(lexer->current_token);
 
   char current_char = *lexer->current_char;
-  if (current_char == '\0') {
+  switch (current_char) {
+  case '\0':
     lexer->current_token = new_token(END, '\0');
-  } else if (current_char == '(') {
+    break;
+  case '(':
     lexer->current_token = new_token(LPAREN, '(');
-  } else if (current_char == ')') {
+    break;
+  case ')':
     lexer->current_token = new_token(RPAREN, ')');
-  } else if (current_char == '|') {
-    lexer->current_token = new_token(OR, '|');
-  } else if (current_char == '*') {
+    break;
+  case '-':
+    lexer->current_token = new_token(DASH, '-');
+    break;
+  case '.':
+    lexer->current_token = new_token(DOT, '.');
+    break;
+  case '+':
+    lexer->current_token = new_token(ONE_OR_MORE, '+');
+    break;
+  case '*':
     lexer->current_token = new_token(REPEAT, '*');
-  } else {
+    break;
+  case '|':
+    lexer->current_token = new_token(OR, '|');
+    break;
+  default:
     lexer->current_token = new_token(LITERAL, current_char);
+    break;
   }
   ++(lexer->current_char);
 

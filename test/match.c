@@ -6,6 +6,7 @@
 #include <string.h>
 
 void match_one_pattern() {
+  g_state_counts = 0;
   NFA *nfa = build("fo(o|ba*r)*baz");
 
   assert(match_full(nfa, "fobaz"));
@@ -15,7 +16,7 @@ void match_one_pattern() {
   assert(match_full(nfa, "foorororbrbrbaz"));
   assert(match_full(nfa, "fooaaaarbarbrbaz"));
 
-  free(nfa);
+  free_nfa(nfa);
 }
 
 void match_multiple_patterns() {
@@ -30,6 +31,8 @@ void match_multiple_patterns() {
   assert(!match_full(nfa, "fo"));
   assert(!match_full(nfa, "fooo"));
   assert(!match_full(nfa, "fbi"));
+
+  free_nfa(nfa);
 }
 
 void match_partitially() {
@@ -47,6 +50,8 @@ void match_partitially() {
 
   assert(match(nfa, "bfoooooa", text) == 5);
   assert(strcmp(text, "foooo") == 0);
+
+  free_nfa(nfa);
 }
 
 void yy() {
@@ -60,6 +65,27 @@ void yy() {
 
   assert(yy_match(nfa) == 2);
   assert(*g_buffer_ptr == 'a');
+
+  free_nfa(nfa);
+}
+
+bool build_and_match(char *pattern, char *input) {
+  g_state_counts = 0;
+  NFA *nfa = build(pattern);
+  bool result = match_full(nfa, input);
+  free_nfa(nfa);
+  return result;
+}
+
+void extended_rules() {
+  assert(build_and_match("f.o", "foo"));
+  assert(build_and_match("f.+o", "farstdhneio"));
+  assert(!build_and_match("f.+o", "farstdhneiob"));
+  assert(build_and_match("f(.o|(ar)+)|z", "fz"));
+  assert(build_and_match("f(.o|(ar)+)|z", "fxo"));
+  assert(build_and_match("f(.o|(ar)+)|z", "fxar"));
+  assert(build_and_match("f(.o|(ar)*)|z", "fx"));
+  assert(!build_and_match("f(.o|(ar)+)|z", "fx"));
 }
 
 int main(int argc, char *argv[]) {
@@ -67,6 +93,7 @@ int main(int argc, char *argv[]) {
   match_multiple_patterns();
   match_partitially();
   yy();
+  extended_rules();
 
   printf("All tests in match.c pass!\n");
   return EXIT_SUCCESS;

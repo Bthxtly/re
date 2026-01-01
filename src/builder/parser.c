@@ -61,6 +61,10 @@ static Ast *new_ast_literal(char value) {
   return node;
 }
 
+static Ast *new_ast_any() {
+  return new_ast_literal(-2); /* `ANY` defined in nfa.c */
+}
+
 static Ast *new_ast_and(Ast *r1, Ast *r2) {
   Ast *node = (Ast *)malloc(sizeof(Ast));
   node->type = AndNode;
@@ -93,6 +97,25 @@ static Ast *new_ast_surround(Ast *r) {
   node->data = (AstData *)malloc(sizeof(AstData));
   node->data->surround.r = r;
   return node;
+}
+
+/* clone */
+static Ast *clone_ast(Ast *r) {
+  if (r == NULL)
+    return NULL;
+  switch (r->type) {
+  case LiteralNode:
+    return new_ast_literal(r->data->literal.value);
+  case AndNode:
+    return new_ast_and(clone_ast(r->data->and.r1), clone_ast(r->data->and.r2));
+  case OrNode:
+    return new_ast_or(clone_ast(r->data->or.r1), clone_ast(r->data->or.r2));
+  case RepeatNode:
+    return new_ast_repeat(clone_ast(r->data->repeat.r));
+  case SurroundNode:
+    return clone_ast(clone_ast(r->data->surround.r));
+  }
+  return NULL; /* unreachable */
 }
 
 /* free */
@@ -156,6 +179,7 @@ static Ast *parse_base(Parser *parser);
 static Ast *parse_expr(Parser *parser) {
   Ast *node = parse_term(parser);
   while (parser->current_token->type == LITERAL ||
+         parser->current_token->type == DOT ||
          parser->current_token->type == LPAREN) {
     Ast *right = parse_term(parser);
     node = new_ast_and(node, right);
@@ -177,25 +201,34 @@ static Ast *parse_term(Parser *parser) {
 }
 
 /*
- * factor := base ('*')*
+ * factor := base ('*')
+ *           base ('+')
  */
 static Ast *parse_factor(Parser *parser) {
   Ast *node = parse_base(parser);
-  while (parser->current_token->type == REPEAT) {
+  if (parser->current_token->type == REPEAT) {
     eat(parser, REPEAT);
     node = new_ast_repeat(node);
+  } else if (parser->current_token->type == ONE_OR_MORE) {
+    eat(parser, ONE_OR_MORE);
+    node = new_ast_and(clone_ast(node), new_ast_repeat(node));
   }
   return node;
 }
 
 /*
- * base := LITERAL | '(' expr ')'
+ * base := LITERAL
+ *       | DOT
+ *       | '(' expr ')'
  */
 static Ast *parse_base(Parser *parser) {
   if (parser->current_token->type == LITERAL) {
     char value = parser->current_token->value;
     eat(parser, LITERAL);
     return new_ast_literal(value);
+  } else if (parser->current_token->type == DOT) {
+    eat(parser, DOT);
+    return new_ast_any();
   } else if (parser->current_token->type == LPAREN) {
     eat(parser, LPAREN);
     Ast *node = parse_expr(parser);
