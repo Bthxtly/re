@@ -15,7 +15,7 @@ int main() {
     if (scanf("%s", buffer) != 1 || strcmp(buffer, "q") == 0)
       break;
 
-    if (match_string(nfa, buffer)) {
+    if (match_full(nfa, buffer)) {
       printf("Matches!\n");
     } else {
       printf("Doesn't match.\n");

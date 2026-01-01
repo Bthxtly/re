@@ -20,7 +20,7 @@ void match_one_pattern() {
 
 void match_multiple_patterns() {
   char *patterns[] = {"foo", "foooo", "fo*b"};
-  size_t len = sizeof(patterns) / sizeof(char *);
+  IdxType len = sizeof(patterns) / sizeof(char *);
   NFA *nfa = build_many(patterns, len);
 
   assert(match_full(nfa, "foo"));
@@ -33,39 +33,33 @@ void match_multiple_patterns() {
 }
 
 void match_partitially() {
-  char *patterns[] = {
-      "Lorem",      "ipsum", "dolor", "sit", "amet",    "consectetur",
-      "adipiscing", "elit",  "sed",   "do",  "eiusmod", "tempor",
-  };
-  size_t len = sizeof(patterns) / sizeof(char *);
+  char *patterns[] = {"foo", "foooo", "fo*b"};
+  IdxType len = sizeof(patterns) / sizeof(char *);
   NFA *nfa = build_many(patterns, len);
 
-  assert(match(nfa, "foosed"));
-  assert(match(nfa, "fLoremmm"));
-  assert(match(nfa, "dolor"));
-  assert(!match(nfa, "ame"));
-  assert(!match(nfa, "empo"));
+  char text[10];
+
+  assert(match(nfa, "bfooooob", text) == 7);
+  assert(strcmp(text, "fooooob") == 0);
+
+  assert(match(nfa, "bfoooa", text) == 3);
+  assert(strcmp(text, "foo") == 0);
+
+  assert(match(nfa, "bfoooooa", text) == 5);
+  assert(strcmp(text, "foooo") == 0);
 }
 
 void yy() {
   char *patterns[] = {"foo", "foooo", "fo*b"};
-  size_t len = sizeof(patterns) / sizeof(char *);
+  IdxType len = sizeof(patterns) / sizeof(char *);
   NFA *nfa = build_many(patterns, len);
 
-  char yytext[10];
-  size_t yyleng;
+  g_buffer = "fooobaz";
+  g_buflen = 7;
+  g_buffer_ptr = g_buffer;
 
-  assert(yy_match(nfa, "bfooooob", yytext, &yyleng));
-  assert(strcmp(yytext, "fooooob") == 0);
-  assert(yyleng == 7);
-
-  assert(yy_match(nfa, "bfoooa", yytext, &yyleng));
-  assert(strcmp(yytext, "foo") == 0);
-  assert(yyleng == 3);
-
-  assert(yy_match(nfa, "bfoooooa", yytext, &yyleng));
-  assert(strcmp(yytext, "foooo") == 0);
-  assert(yyleng == 5);
+  assert(yy_match(nfa) == 2);
+  assert(*g_buffer_ptr == 'a');
 }
 
 int main(int argc, char *argv[]) {

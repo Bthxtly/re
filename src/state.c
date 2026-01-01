@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX 99
+#define MAX 999
 #define bool char
 #define true 1
 #define false 0
@@ -38,15 +38,15 @@ bool have_state(States *s, State state) {
   return false;
 }
 
-/* if two containers have the same state */
-bool have_same_state(States *s1, States *s2) {
+/* if two containers have the same state, return the state */
+State get_shared_states(States *s1, States *s2) {
   for (size_t i = 0; i < s1->len; ++i) {
     for (size_t j = 0; j < s2->len; ++j) {
       if (s1->states[i] == s2->states[j])
-        return true;
+        return s1->states[i];
     }
   }
-  return false;
+  return 0;
 }
 
 /* print states of the container */

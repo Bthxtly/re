@@ -112,7 +112,7 @@ void test_ast() {
 
 void test_nfa() {
   NFA *nfa = build("fo(o|ba*r)*baz");
-  // print_edges(nfa);
+  /* print_edges(nfa); */
   // clang-format off
   /*
    *                                      /-<---------------------<-ε-<---------------------------<-\
