@@ -11,16 +11,16 @@ NFA *init_nfa() {
   States *target_states = new_states();
   push_state(target_states, 7);
   nfa->target_states = target_states;
-  push_edge(nfa, new_edge(EPS, 1, 2));
-  push_edge(nfa, new_edge(EPS, 1, 4));
-  push_edge(nfa, new_edge(EPS, 3, 6));
-  push_edge(nfa, new_edge(EPS, 5, 6));
-  push_edge(nfa, new_edge('a', 2, 3));
-  push_edge(nfa, new_edge('b', 4, 5));
-  push_edge(nfa, new_edge(EPS, 0, 1));
-  push_edge(nfa, new_edge(EPS, 0, 7));
-  push_edge(nfa, new_edge(EPS, 6, 1));
-  push_edge(nfa, new_edge(EPS, 6, 7));
+  push_edge(nfa, new_edge(new_literal_label(EPS), 1, 2));
+  push_edge(nfa, new_edge(new_literal_label(EPS), 1, 4));
+  push_edge(nfa, new_edge(new_literal_label(EPS), 3, 6));
+  push_edge(nfa, new_edge(new_literal_label(EPS), 5, 6));
+  push_edge(nfa, new_edge(new_literal_label('a'), 2, 3));
+  push_edge(nfa, new_edge(new_literal_label('b'), 4, 5));
+  push_edge(nfa, new_edge(new_literal_label(EPS), 0, 1));
+  push_edge(nfa, new_edge(new_literal_label(EPS), 0, 7));
+  push_edge(nfa, new_edge(new_literal_label(EPS), 6, 1));
+  push_edge(nfa, new_edge(new_literal_label(EPS), 6, 7));
 
   assert(nfa->states_count == 8);
   assert(nfa->edges_count == 10);

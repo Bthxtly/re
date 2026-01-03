@@ -4,6 +4,10 @@
 #include "ast.c"
 #include "lexer.c"
 
+#define bool char
+#define true 1
+#define false 0
+
 typedef struct Parser {
   Lexer *lexer;
   Token *current_token;
@@ -31,6 +35,7 @@ static Ast *parse_expr(Parser *parser);
 static Ast *parse_term(Parser *parser);
 static Ast *parse_factor(Parser *parser);
 static Ast *parse_base(Parser *parser);
+static Ast *parse_range(Parser *parser);
 
 /*
  * expr := term*
@@ -38,7 +43,9 @@ static Ast *parse_base(Parser *parser);
 static Ast *parse_expr(Parser *parser) {
   Ast *node = parse_term(parser);
   while (parser->current_token->type == LITERAL ||
+         parser->current_token->type == CARET ||
          parser->current_token->type == DOT ||
+         parser->current_token->type == LBRACKET ||
          parser->current_token->type == LPAREN) {
     Ast *right = parse_term(parser);
     node = new_ast_and(node, right);
@@ -76,27 +83,80 @@ static Ast *parse_factor(Parser *parser) {
 }
 
 /*
- * base := LITERAL
+ * base := LITERAL | CARET
  *       | DOT
+ *       | '[' range ']'
  *       | '(' expr ')'
  */
 static Ast *parse_base(Parser *parser) {
-  if (parser->current_token->type == LITERAL) {
+  switch (parser->current_token->type) {
+  case LITERAL: {
     char value = parser->current_token->value;
     eat(parser, LITERAL);
     return new_ast_literal(value);
-  } else if (parser->current_token->type == DOT) {
+  }
+  case CARET: {
+    char value = parser->current_token->value;
+    eat(parser, CARET);
+    return new_ast_literal(value);
+  }
+  case DOT: {
     eat(parser, DOT);
     return new_ast_any();
-  } else if (parser->current_token->type == LPAREN) {
+  }
+  case LBRACKET: {
+    eat(parser, LBRACKET);
+    Ast *node = parse_range(parser);
+    eat(parser, RBRACKET);
+    return node;
+  }
+  case LPAREN: {
     eat(parser, LPAREN);
     Ast *node = parse_expr(parser);
     eat(parser, RPAREN);
     return new_ast_surround(node);
-  } else {
+  }
+  default: {
     printf("unexpected token: %d\n", parser->current_token->type);
     exit(1);
   }
+  }
+}
+
+/*
+ * range or set
+ * range := CARET
+ *        | LITERAL
+ *        | LITERAL DASH LITERAL
+ *        | range
+ */
+static Ast *parse_range(Parser *parser) {
+  /* parse negate ^ */
+  bool is_neg = false;
+  if (parser->current_token->type == CARET) {
+    is_neg = true;
+    eat(parser, CARET);
+  }
+
+  Ast *left = NULL;
+  while (parser->current_token->type != RBRACKET) {
+    char from = parser->current_token->value;
+    eat(parser, LITERAL);
+    Ast *right;
+    /* range */
+    if (parser->current_token->type == DASH) {
+      eat(parser, DASH);
+      char to = parser->current_token->value;
+      eat(parser, LITERAL);
+      right = new_ast_range(from, to);
+    }
+    /* set */
+    else
+      right = new_ast_literal(from);
+
+    left = (left == NULL ? right : new_ast_or(left, right));
+  }
+  return left;
 }
 
 /* Entry point for parsing */

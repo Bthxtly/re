@@ -31,12 +31,16 @@ static void decrease_state_counts() { --g_state_counts; }
 
 /* add an ε-labled edge to the NFA */
 static void add_epsilon(NFA *nfa, State from, State to) {
-  push_edge(nfa, new_edge(EPSILON, from, to));
+  push_edge(nfa, new_edge(new_literal_label(EPSILON), from, to));
 }
 
 /* add a symbol-labled edge to the NFA */
 static void add_symbol(NFA *nfa, State from, State to, char symbol) {
-  push_edge(nfa, new_edge(symbol, from, to));
+  push_edge(nfa, new_edge(new_literal_label(symbol), from, to));
+}
+
+static void add_range(NFA *nfa, State from, State to, char c_from, char c_to) {
+  push_edge(nfa, new_edge(new_range_label(c_from, c_to), from, to));
 }
 
 /* move all edges from source NFA to destination NFA */
@@ -58,6 +62,15 @@ static NFAFragment *ast2nfa_fragment(Ast *ast) {
     State start = increase_state_counts();
     State accept = increase_state_counts();
     add_symbol(nfa, start, accept, ast->data->literal.value);
+    return new_nfa_fragment(nfa, start, accept);
+  }
+
+  case RangeNode: {
+    /* START --range--> END */
+    NFA *nfa = new_nfa();
+    State start = increase_state_counts();
+    State accept = increase_state_counts();
+    add_range(nfa, start, accept, ast->data->range.from, ast->data->range.to);
     return new_nfa_fragment(nfa, start, accept);
   }
 

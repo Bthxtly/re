@@ -7,6 +7,9 @@
 typedef enum TokenType {
   LPAREN,
   RPAREN,
+  LBRACKET,
+  RBRACKET,
+  CARET,
   DASH,
   DOT,
   ONE_OR_MORE,
@@ -58,6 +61,15 @@ Token *get_next_token(Lexer *lexer) {
     break;
   case ')':
     lexer->current_token = new_token(RPAREN, ')');
+    break;
+  case '[':
+    lexer->current_token = new_token(LBRACKET, '[');
+    break;
+  case ']':
+    lexer->current_token = new_token(RBRACKET, ']');
+    break;
+  case '^':
+    lexer->current_token = new_token(CARET, '^');
     break;
   case '-':
     lexer->current_token = new_token(DASH, '-');

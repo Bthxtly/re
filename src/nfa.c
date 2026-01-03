@@ -1,15 +1,61 @@
 #include "state.c"
 #include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 char EPSILON = -1;
-char ANY = -2;
+
+typedef struct Label {
+  enum {
+    CHAR,
+    RANGE,
+    NEG_RANGE,
+    SET,
+    NEG_SET,
+  } type;
+
+  union {
+    char symbol;
+    struct Range {
+      char from, to;
+      bool is_neg;
+    } range;
+    struct Set {
+      char *set;
+      bool is_neg;
+    } set;
+  } data;
+} Label;
+
+Label *new_literal_label(char symbol) {
+  Label *label = (Label *)malloc(sizeof(Label));
+  label->type = CHAR;
+  label->data.symbol = symbol;
+  return label;
+}
+
+Label *new_range_label(char from, char to) {
+  Label *label = (Label *)malloc(sizeof(Label));
+  label->type = RANGE;
+  label->data.range.from = from;
+  label->data.range.to = to;
+  return label;
+}
 
 typedef struct Edge {
-  char symbol;
+  Label *label;
   State from;
   State to;
 } Edge;
+
+/* create a new edge */
+Edge *new_edge(Label *label, State from, State to) {
+  Edge *e = (Edge *)malloc(sizeof(Edge));
+  e->label = label;
+  e->from = from;
+  e->to = to;
+  return e;
+}
 
 typedef struct NFA {
   State states_count;
@@ -25,15 +71,6 @@ NFA *new_nfa() {
   nfa->target_states = NULL;
   nfa->edges_count = 0;
   return nfa;
-}
-
-/* create a new edge with given symbol, from, to */
-Edge *new_edge(char symbol, State from, State to) {
-  Edge *e = (Edge *)malloc(sizeof(Edge));
-  e->symbol = symbol;
-  e->from = from;
-  e->to = to;
-  return e;
 }
 
 /* set the states count of an NFA */
@@ -52,14 +89,20 @@ void push_edge(NFA *nfa, Edge *e) {
 
 /* print edges in the form of `from --symbol--> to` */
 void print_edges(NFA *nfa) {
+  printf("=== NFA\n");
   for (size_t i = 0; i < nfa->edges_count; ++i) {
     Edge *e = nfa->edges[i];
-    if (e->symbol == EPSILON)
-      printf("%d --ε--> %d\n", e->from, e->to);
-    else if (e->symbol == ANY)
-      printf("%d --¤--> %d\n", e->from, e->to);
-    else
-      printf("%d --%c--> %d\n", e->from, e->symbol, e->to);
+    Label *l = e->label;
+    if (l->type == CHAR) {
+      char symbol = l->data.symbol;
+      if (symbol == EPSILON)
+        printf("%2d ---ε---> %2d\n", e->from, e->to);
+      else
+        printf("%2d ---%c---> %2d\n", e->from, symbol, e->to);
+    } else if (l->type == RANGE) {
+      printf("%2d --%c~%c--> %2d\n", e->from, l->data.range.from,
+             l->data.range.to, e->to);
+    }
   }
 }
 
@@ -67,6 +110,7 @@ void print_edges(NFA *nfa) {
 void free_nfa(NFA *nfa) {
   /* free edges */
   for (size_t i = 0; i < nfa->edges_count; ++i) {
+    free(nfa->edges[i]->label);
     free(nfa->edges[i]);
   }
   /* free target states */
@@ -78,7 +122,22 @@ void free_nfa(NFA *nfa) {
   nfa = NULL;
 }
 
-/* return all states reachable with epsilon lables from the given states */
+static bool accept(Label *label, char input) {
+  switch (label->type) {
+  case CHAR:
+    return input == label->data.symbol;
+  case RANGE:
+    return (label->data.range.from <= input && input <= label->data.range.to);
+  case NEG_RANGE:
+    return !(label->data.range.from <= input && input <= label->data.range.to);
+  case SET:
+  case NEG_SET:
+    break;
+  }
+  exit(EXIT_FAILURE);
+}
+
+/* return all states reachable with epsilon labels from the given states */
 States *epsilon_closure(NFA *nfa, States *s) {
   States *new_s = new_states();
 
@@ -93,7 +152,7 @@ States *epsilon_closure(NFA *nfa, States *s) {
     State state = s->states[s->len];
     for (size_t i = 0; i < nfa->edges_count; ++i) {
       Edge *e = nfa->edges[i];
-      if (e->symbol == EPSILON && e->from == state) {
+      if (e->from == state && accept(e->label, EPSILON)) {
         State next_state = e->to;
         if (!have_state(new_s, next_state)) {
           push_state(new_s, next_state);
@@ -114,8 +173,7 @@ States *move(NFA *nfa, States *s, char symbol) {
   for (size_t i = 0; i < s->len; ++i) {
     for (size_t j = 0; j < nfa->edges_count; ++j) {
       Edge *e = nfa->edges[j];
-      if ((e->symbol == ANY || e->symbol == symbol) &&
-          e->from == s->states[i]) {
+      if (e->from == s->states[i] && accept(e->label, symbol)) {
         State next_state = e->to;
         if (!have_state(new_s, next_state)) {
           push_state(new_s, next_state);
