@@ -110,6 +110,27 @@ void test_ast() {
   free(parser);
 }
 
+void test_ast_set() {
+  char *pattern = "[^0-9]";
+  Lexer *lexer = new_lexer(pattern);
+  Parser *parser = new_parser(lexer);
+  Ast *ast = parse(parser);
+
+  assert(ast->type == SetNode);
+  assert(ast->data->set.is_neg == true);
+  assert(ast->data->set.set->size == 10);
+  assert(ast->data->set.set->data[0] == '0');
+  assert(ast->data->set.set->data[1] == '1');
+  assert(ast->data->set.set->data[2] == '2');
+  assert(ast->data->set.set->data[3] == '3');
+  assert(ast->data->set.set->data[4] == '4');
+  assert(ast->data->set.set->data[5] == '5');
+  assert(ast->data->set.set->data[6] == '6');
+  assert(ast->data->set.set->data[7] == '7');
+  assert(ast->data->set.set->data[8] == '8');
+  assert(ast->data->set.set->data[9] == '9');
+}
+
 void test_nfa() {
   NFA *nfa = build("fo(o|ba*r)*baz");
   /* print_edges(nfa); */
@@ -132,6 +153,7 @@ void test_nfa() {
 int main() {
   tokenize();
   test_ast();
+  test_ast_set();
   test_nfa();
 
   printf("All tests in builder.c pass!\n");

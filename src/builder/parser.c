@@ -5,6 +5,10 @@
 #include "ast.c"
 #include "lexer.c"
 
+/* pre-define */
+Vector_char *new_vector_char();
+int push_vector_char(Vector_char *vec, char value);
+
 typedef struct Parser {
   Lexer *lexer;
   Token *current_token;
@@ -98,8 +102,11 @@ static Ast *parse_base(Parser *parser) {
     return new_ast_literal(value);
   }
   case DOT: {
+    /* anything but newline */
     eat(parser, DOT);
-    return new_ast_any();
+    Vector_char *set = new_vector_char();
+    push_vector_char(set, '\n');
+    return new_ast_set(set, true);
   }
   case LBRACKET: {
     eat(parser, LBRACKET);
@@ -135,7 +142,7 @@ static Ast *parse_range(Parser *parser) {
     eat(parser, CARET);
   }
 
-  Ast *left = NULL;
+  Vector_char *set = new_vector_char();
   while (parser->current_token->type != RBRACKET) {
     char from = parser->current_token->value;
     eat(parser, LITERAL);
@@ -145,15 +152,14 @@ static Ast *parse_range(Parser *parser) {
       eat(parser, DASH);
       char to = parser->current_token->value;
       eat(parser, LITERAL);
-      right = new_ast_range(from, to);
+      for (char c = from; c <= to; ++c)
+        push_vector_char(set, c);
     }
     /* set */
     else
-      right = new_ast_literal(from);
-
-    left = (left == NULL ? right : new_ast_or(left, right));
+      push_vector_char(set, from);
   }
-  return left;
+  return new_ast_set(set, is_neg);
 }
 
 /* Entry point for parsing */

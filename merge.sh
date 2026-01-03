@@ -40,12 +40,34 @@ cat >>$target_file <<EOF
 
 /*
  * ============================================================================
+ * builder/ast.c - Abstract Syntax Tree
+ * ============================================================================
+ */
+EOF
+
+cat src/builder/ast.c >>$target_file
+
+cat >>$target_file <<EOF
+
+/*
+ * ============================================================================
  * builder/parser.c - Parser for regular expressions
  * ============================================================================
  */
 EOF
 
 cat src/builder/parser.c >>$target_file
+
+cat >>$target_file <<EOF
+
+/*
+ * ============================================================================
+ * edge.c - Edges between states
+ * ============================================================================
+ */
+EOF
+
+cat src/edge.c >>$target_file
 
 cat >>$target_file <<EOF
 
@@ -82,3 +104,8 @@ cat src/match.c >>$target_file
 
 # remove `#include`s from source codes
 sed -i '10,${/#include/d}' $target_file
+
+# fix `#include "util/vector.c"`
+sed -i '/#define TYPE/{
+  r src/util/vector.c
+}' $target_file

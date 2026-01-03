@@ -67,7 +67,7 @@ IdxType match(NFA *nfa, char *input, char *text) {
  * similar to `match`, but copy to yytext, assign its length to yyleng,
  * and return the index of the pattern matched
  */
-#include "yy.c"
+#include "util/yy.c"
 int yy_match(NFA *nfa) {
   States *s = new_states();
   push_state(s, 0);

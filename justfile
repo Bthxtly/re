@@ -1,5 +1,7 @@
 # https://just.systems
 
+default: merge
+
 run:
   @gcc src/main.c
   @./a.out
@@ -26,6 +28,3 @@ test_match:
   @rm a.out
 
 test: test_builder test_nfa test_match
-
-default:
-  echo 'Hello, world!'

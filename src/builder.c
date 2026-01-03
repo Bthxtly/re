@@ -39,8 +39,9 @@ static void add_symbol(NFA *nfa, State from, State to, char symbol) {
   push_edge(nfa, new_edge(new_literal_label(symbol), from, to));
 }
 
-static void add_range(NFA *nfa, State from, State to, char c_from, char c_to) {
-  push_edge(nfa, new_edge(new_range_label(c_from, c_to), from, to));
+static void add_set(NFA *nfa, State from, State to, Vector_char *set,
+                    bool is_neg) {
+  push_edge(nfa, new_edge(new_set_label(set, is_neg), from, to));
 }
 
 /* move all edges from source NFA to destination NFA */
@@ -65,12 +66,12 @@ static NFAFragment *ast2nfa_fragment(Ast *ast) {
     return new_nfa_fragment(nfa, start, accept);
   }
 
-  case RangeNode: {
-    /* START --range--> END */
+  case SetNode: {
+    /* START --set--> END */
     NFA *nfa = new_nfa();
     State start = increase_state_counts();
     State accept = increase_state_counts();
-    add_range(nfa, start, accept, ast->data->range.from, ast->data->range.to);
+    add_set(nfa, start, accept, ast->data->set.set, ast->data->set.is_neg);
     return new_nfa_fragment(nfa, start, accept);
   }
 

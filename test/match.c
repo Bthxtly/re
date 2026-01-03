@@ -79,20 +79,20 @@ bool build_and_match(char *pattern, char *input) {
 
 void extended_rules() {
   /* dot */
-  // assert(build_and_match("f.o", "foo"));
-  // assert(build_and_match("f.+o", "farstdhneio"));
-  // assert(!build_and_match("f.+o", "farstdhneiob"));
+  assert(build_and_match("f.o", "foo"));
+  assert(build_and_match("f.+o", "farstdhneio"));
+  assert(!build_and_match("f.+o", "farstdhneiob"));
   /* range */
   assert(build_and_match("[0-9]", "5"));
+  assert(build_and_match("[0-9a-z]", "b"));
+  assert(build_and_match("[^0-9]", "b"));
+  assert(build_and_match("[^0-9a-z]", "B"));
   assert(build_and_match("[0-9]+", "114514"));
-  assert(build_and_match("[0-9a-zA-Z]+", "Act2N12"));
-  // assert(build_and_match("[^0-9]", "b"));
-  // assert(build_and_match("[^0-9a-z]", "B"));
-  // /* set */
+  /* set */
   assert(build_and_match("[abc]", "b"));
   assert(!build_and_match("[abc]", "d"));
-  // assert(build_and_match("[^abc]", "d"));
-  // assert(!build_and_match("[^abc]", "b"));
+  assert(build_and_match("[^abc]", "d"));
+  assert(!build_and_match("[^abc]", "b"));
 }
 
 int main(int argc, char *argv[]) {

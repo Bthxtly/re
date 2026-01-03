@@ -1,61 +1,10 @@
-#include "state.c"
+#include "edge.c"
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 char EPSILON = -1;
-
-typedef struct Label {
-  enum {
-    CHAR,
-    RANGE,
-    NEG_RANGE,
-    SET,
-    NEG_SET,
-  } type;
-
-  union {
-    char symbol;
-    struct Range {
-      char from, to;
-      bool is_neg;
-    } range;
-    struct Set {
-      char *set;
-      bool is_neg;
-    } set;
-  } data;
-} Label;
-
-Label *new_literal_label(char symbol) {
-  Label *label = (Label *)malloc(sizeof(Label));
-  label->type = CHAR;
-  label->data.symbol = symbol;
-  return label;
-}
-
-Label *new_range_label(char from, char to) {
-  Label *label = (Label *)malloc(sizeof(Label));
-  label->type = RANGE;
-  label->data.range.from = from;
-  label->data.range.to = to;
-  return label;
-}
-
-typedef struct Edge {
-  Label *label;
-  State from;
-  State to;
-} Edge;
-
-/* create a new edge */
-Edge *new_edge(Label *label, State from, State to) {
-  Edge *e = (Edge *)malloc(sizeof(Edge));
-  e->label = label;
-  e->from = from;
-  e->to = to;
-  return e;
-}
 
 typedef struct NFA {
   State states_count;
@@ -99,9 +48,18 @@ void print_edges(NFA *nfa) {
         printf("%2d ---ε---> %2d\n", e->from, e->to);
       else
         printf("%2d ---%c---> %2d\n", e->from, symbol, e->to);
-    } else if (l->type == RANGE) {
-      printf("%2d --%c~%c--> %2d\n", e->from, l->data.range.from,
-             l->data.range.to, e->to);
+    } else if (l->type == SET || NEG_SET) {
+      printf("%2d --", e->from);
+      if (l->type == NEG_SET)
+        printf("^");
+      for (size_t i = 0; i < e->label->data.set->size; ++i) {
+        char c = e->label->data.set->data[i];
+        if (c == '\n')
+          printf("↵");
+        else
+          printf("%c", c);
+      }
+      printf("--> %2d\n", e->to);
     }
   }
 }
@@ -126,13 +84,16 @@ static bool accept(Label *label, char input) {
   switch (label->type) {
   case CHAR:
     return input == label->data.symbol;
-  case RANGE:
-    return (label->data.range.from <= input && input <= label->data.range.to);
-  case NEG_RANGE:
-    return !(label->data.range.from <= input && input <= label->data.range.to);
   case SET:
+    for (size_t i = 0; i < label->data.set->size; ++i)
+      if (label->data.set->data[i] == input)
+        return true;
+    return false;
   case NEG_SET:
-    break;
+    for (size_t i = 0; i < label->data.set->size; ++i)
+      if (label->data.set->data[i] == input)
+        return false;
+    return true;
   }
   exit(EXIT_FAILURE);
 }

@@ -1,8 +1,9 @@
+#include <stdbool.h>
 #include <stdlib.h>
 
 typedef enum AstType {
   LiteralNode,
-  RangeNode,
+  SetNode,
   AndNode,
   OrNode,
   RepeatNode,
@@ -15,10 +16,11 @@ typedef struct AstLiteral {
   char value;
 } AstLiteral;
 
-typedef struct AstRange {
-  char from;
-  char to;
-} AstRange;
+typedef struct Vector_char Vector_char;
+typedef struct AstSet {
+  Vector_char *set;
+  bool is_neg;
+} AstSet;
 
 typedef struct AstAnd {
   Ast *r1;
@@ -40,7 +42,7 @@ typedef struct AstSurround {
 
 typedef union AstData {
   AstLiteral literal;
-  AstRange range;
+  AstSet set;
   AstAnd and;
   AstOr or;
   AstRepeat repeat;
@@ -61,14 +63,12 @@ static Ast *new_ast_literal(char value) {
   return node;
 }
 
-static Ast *new_ast_any() { return new_ast_literal('o'); }
-
-static Ast *new_ast_range(char from, char to) {
+static Ast *new_ast_set(Vector_char *set, bool is_neg) {
   Ast *node = (Ast *)malloc(sizeof(Ast));
-  node->type = RangeNode;
+  node->type = SetNode;
   node->data = (AstData *)malloc(sizeof(AstData));
-  node->data->range.from = from;
-  node->data->range.to = to;
+  node->data->set.set = set;
+  node->data->set.is_neg = is_neg;
   return node;
 }
 
@@ -113,8 +113,8 @@ static Ast *clone_ast(Ast *r) {
   switch (r->type) {
   case LiteralNode:
     return new_ast_literal(r->data->literal.value);
-  case RangeNode:
-    return new_ast_range(r->data->range.from, r->data->range.to);
+  case SetNode:
+    return new_ast_set(r->data->set.set, r->data->set.is_neg);
   case AndNode:
     return new_ast_and(clone_ast(r->data->and.r1), clone_ast(r->data->and.r2));
   case OrNode:
@@ -135,8 +135,7 @@ void free_ast(Ast *node) {
   case LiteralNode:
     /* nothing to free */
     break;
-  case RangeNode:
-    /* nothing to free */
+  case SetNode:
     break;
   case AndNode:
     free_ast(node->data->and.r1);
