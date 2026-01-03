@@ -8,6 +8,7 @@ cat >$target_file <<EOF
  * For embedding into lers projects
  */
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>

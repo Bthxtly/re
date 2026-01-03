@@ -1,11 +1,9 @@
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #define MAX 999
-#define bool char
-#define true 1
-#define false 0
 
 typedef unsigned short State;
 

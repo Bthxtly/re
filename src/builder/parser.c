@@ -1,12 +1,9 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "ast.c"
 #include "lexer.c"
-
-#define bool char
-#define true 1
-#define false 0
 
 typedef struct Parser {
   Lexer *lexer;
