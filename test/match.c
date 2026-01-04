@@ -82,6 +82,7 @@ void extended_rules() {
   /* dot */
   assert(build_and_match("f.o", "foo"));
   assert(build_and_match("f.+o", "farstdhneio"));
+  assert(!build_and_match("f.+o", "fo"));
   assert(!build_and_match("f.+o", "farstdhneiob"));
   /* range */
   assert(build_and_match("[0-9]", "5"));

@@ -81,6 +81,9 @@ void free_nfa(NFA *nfa) {
 }
 
 static bool accept(Label *label, char input) {
+  if (input == EPSILON)
+    return label->type == CHAR && label->data.symbol == EPSILON;
+
   switch (label->type) {
   case CHAR:
     return input == label->data.symbol;
