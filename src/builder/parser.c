@@ -39,30 +39,30 @@ static Ast *parse_base(Parser *parser);
 static Ast *parse_range(Parser *parser);
 
 /*
- * expr := term*
+ * expr := term ('|' term)*
  */
 static Ast *parse_expr(Parser *parser) {
   Ast *node = parse_term(parser);
-  while (parser->current_token->type == LITERAL ||
-         parser->current_token->type == CARET ||
-         parser->current_token->type == DOT ||
-         parser->current_token->type == LBRACKET ||
-         parser->current_token->type == LPAREN) {
+  while (parser->current_token->type == OR) {
+    eat(parser, OR);
     Ast *right = parse_term(parser);
-    node = new_ast_and(node, right);
+    node = new_ast_or(node, right);
   }
   return node;
 }
 
 /*
- * term := factor ('|' factor)*
+ * term := factor*
  */
 static Ast *parse_term(Parser *parser) {
   Ast *node = parse_factor(parser);
-  while (parser->current_token->type == OR) {
-    eat(parser, OR);
+  while (parser->current_token->type == LITERAL ||
+         parser->current_token->type == CARET ||
+         parser->current_token->type == DOT ||
+         parser->current_token->type == LBRACKET ||
+         parser->current_token->type == LPAREN) {
     Ast *right = parse_factor(parser);
-    node = new_ast_or(node, right);
+    node = new_ast_and(node, right);
   }
   return node;
 }

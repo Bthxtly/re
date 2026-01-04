@@ -48,14 +48,14 @@ void test_ast() {
    *  │ │ │ │ └ Literal('o')
    *  │ │ │ └ Repeat
    *  │ │ │   └ Surround
-   *  │ │ │     └ And
-   *  │ │ │       ├ And
-   *  │ │ │       │ ├ Or
-   *  │ │ │       │ │ ├ Literal('o')
-   *  │ │ │       │ │ └ Literal('b')
-   *  │ │ │       │ └ Repeat
-   *  │ │ │       │   └ Literal('a')
-   *  │ │ │       └ Literal('r')
+   *  │ │ │     └ Or
+   *  │ │ │       ├ Literal('o')
+   *  │ │ │       └ And
+   *  │ │ │         ├ And
+   *  │ │ │         │ ├ Literal('b')
+   *  │ │ │         │ └ Repeat
+   *  │ │ │         │   └ Literal('a')
+   *  │ │ │         └ Literal('r')
    *  │ │ └ Literal('b')
    *  │ └ Literal('a')
    *  └ Literal('z')
@@ -73,14 +73,14 @@ void test_ast() {
                           new_ast_literal('o')),
                       new_ast_repeat(
                           new_ast_surround(
-                              new_ast_and(
+                              new_ast_or(
+                                  new_ast_literal('o'),
                                   new_ast_and(
-                                      new_ast_or(
-                                          new_ast_literal('o'),
-                                          new_ast_literal('b')),
-                                      new_ast_repeat(
-                                          new_ast_literal('a'))),
-                          new_ast_literal('r'))))),
+                                      new_ast_and(
+                                          new_ast_literal('b'),
+                                          new_ast_repeat(
+                                              new_ast_literal('a'))), 
+                                      new_ast_literal('r')))))),
               new_ast_literal('b')),
           new_ast_literal('a')),
       new_ast_literal('z'))));

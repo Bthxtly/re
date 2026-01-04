@@ -10,11 +10,9 @@ void match_one_pattern() {
   NFA *nfa = build("fo(o|ba*r)*baz");
 
   assert(match_full(nfa, "fobaz"));
-  assert(match_full(nfa, "foorbaz"));
   assert(match_full(nfa, "fobrbaz"));
-  assert(match_full(nfa, "fooaaaarbaz"));
-  assert(match_full(nfa, "foorororbrbrbaz"));
-  assert(match_full(nfa, "fooaaaarbarbrbaz"));
+  assert(match_full(nfa, "fobaaaarbaz"));
+  assert(match_full(nfa, "fobrbrbrbrbrbaz"));
 
   free_nfa(nfa);
 }
@@ -78,6 +76,9 @@ bool build_and_match(char *pattern, char *input) {
 }
 
 void extended_rules() {
+  /* or */
+  assert(build_and_match("re|lers", "re"));
+  assert(build_and_match("re|lers", "lers"));
   /* dot */
   assert(build_and_match("f.o", "foo"));
   assert(build_and_match("f.+o", "farstdhneio"));
