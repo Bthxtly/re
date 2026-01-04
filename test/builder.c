@@ -55,52 +55,36 @@ void test_ast() {
    *  │ │ │       │ │ └ Literal('b')
    *  │ │ │       │ └ Repeat
    *  │ │ │       │   └ Literal('a')
-   *  │ │ │       └ And
-   *  │ │ │         └ Literal('r')
+   *  │ │ │       └ Literal('r')
    *  │ │ └ Literal('b')
    *  │ └ Literal('a')
    *  └ Literal('z')
    */
 
-  assert(ast->type == AndNode);
-  assert(ast->data->and.r1->type == AndNode);
-  assert(ast->data->and.r1->data->and.r1->type == AndNode);
-  Ast *fourth_ast = ast->data->and.r1->data->and.r1->data->and.r1;
-  assert(fourth_ast->type == AndNode);
-
-  Ast *fifth_ast = fourth_ast->data->and.r1;
-  assert(fifth_ast->type == AndNode);
-  assert(fifth_ast->data->and.r1->type == LiteralNode);
-  assert(fifth_ast->data->and.r1->data->literal.value == 'f');
-  assert(fifth_ast->data->and.r2->data->literal.value == 'o');
-
-  fifth_ast = fourth_ast->data->and.r2;
-  assert(fifth_ast->type == RepeatNode);
-  assert(fifth_ast->data->repeat.r->type == SurroundNode);
-
-  Ast *seventh_ast = fifth_ast->data->repeat.r->data->surround.r;
-  assert(seventh_ast->type == AndNode);
-  assert(seventh_ast->data->and.r1->type == AndNode);
-
-  Ast *ninth_ast = seventh_ast->data->and.r1->data->and.r1;
-  assert(ninth_ast->type == OrNode);
-  assert(ninth_ast->data->or.r1->type == LiteralNode);
-  assert(ninth_ast->data->or.r1->data->literal.value == 'o');
-  assert(ninth_ast->data->or.r2->type == LiteralNode);
-  assert(ninth_ast->data->or.r2->data->literal.value == 'b');
-
-  assert(seventh_ast->data->and.r2->type == LiteralNode);
-  assert(seventh_ast->data->and.r2->data->literal.value == 'r');
-
-  fourth_ast = ast->data->and.r1->data->and.r1->data->and.r2;
-  assert(fourth_ast->type == LiteralNode);
-  assert(fourth_ast->data->literal.value == 'b');
-
-  assert(ast->data->and.r1->data->and.r2->type == LiteralNode);
-  assert(ast->data->and.r1->data->and.r2->data->literal.value == 'a');
-
-  assert(ast->data->and.r2->type == LiteralNode);
-  assert(ast->data->and.r2->data->literal.value == 'z');
+  // clang-format off
+  assert(equal_ast(
+      ast,
+      new_ast_and(
+          new_ast_and(
+              new_ast_and(
+                  new_ast_and(
+                      new_ast_and(
+                          new_ast_literal('f'),
+                          new_ast_literal('o')),
+                      new_ast_repeat(
+                          new_ast_surround(
+                              new_ast_and(
+                                  new_ast_and(
+                                      new_ast_or(
+                                          new_ast_literal('o'),
+                                          new_ast_literal('b')),
+                                      new_ast_repeat(
+                                          new_ast_literal('a'))),
+                          new_ast_literal('r'))))),
+              new_ast_literal('b')),
+          new_ast_literal('a')),
+      new_ast_literal('z'))));
+  // clang-format on
 
   free_ast(ast);
   if (lexer->current_token != NULL) {
@@ -117,18 +101,18 @@ void test_ast_set() {
   Ast *ast = parse(parser);
 
   assert(ast->type == SetNode);
-  assert(ast->data->set.is_neg == true);
-  assert(ast->data->set.set->size == 10);
-  assert(ast->data->set.set->data[0] == '0');
-  assert(ast->data->set.set->data[1] == '1');
-  assert(ast->data->set.set->data[2] == '2');
-  assert(ast->data->set.set->data[3] == '3');
-  assert(ast->data->set.set->data[4] == '4');
-  assert(ast->data->set.set->data[5] == '5');
-  assert(ast->data->set.set->data[6] == '6');
-  assert(ast->data->set.set->data[7] == '7');
-  assert(ast->data->set.set->data[8] == '8');
-  assert(ast->data->set.set->data[9] == '9');
+  assert(ast->data.AstSet.is_neg == true);
+  assert(ast->data.AstSet.set->size == 10);
+  assert(ast->data.AstSet.set->data[0] == '0');
+  assert(ast->data.AstSet.set->data[1] == '1');
+  assert(ast->data.AstSet.set->data[2] == '2');
+  assert(ast->data.AstSet.set->data[3] == '3');
+  assert(ast->data.AstSet.set->data[4] == '4');
+  assert(ast->data.AstSet.set->data[5] == '5');
+  assert(ast->data.AstSet.set->data[6] == '6');
+  assert(ast->data.AstSet.set->data[7] == '7');
+  assert(ast->data.AstSet.set->data[8] == '8');
+  assert(ast->data.AstSet.set->data[9] == '9');
 }
 
 void test_nfa() {

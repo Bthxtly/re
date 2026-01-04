@@ -62,7 +62,7 @@ static NFAFragment *ast2nfa_fragment(Ast *ast) {
     NFA *nfa = new_nfa();
     State start = increase_state_counts();
     State accept = increase_state_counts();
-    add_symbol(nfa, start, accept, ast->data->literal.value);
+    add_symbol(nfa, start, accept, ast->data.AstLiteral.value);
     return new_nfa_fragment(nfa, start, accept);
   }
 
@@ -71,15 +71,15 @@ static NFAFragment *ast2nfa_fragment(Ast *ast) {
     NFA *nfa = new_nfa();
     State start = increase_state_counts();
     State accept = increase_state_counts();
-    add_set(nfa, start, accept, ast->data->set.set, ast->data->set.is_neg);
+    add_set(nfa, start, accept, ast->data.AstSet.set, ast->data.AstSet.is_neg);
     return new_nfa_fragment(nfa, start, accept);
   }
 
   case AndNode: {
     /* START --left--> (left end & right start) --right--> END */
-    NFAFragment *left = ast2nfa_fragment(ast->data->and.r1);
+    NFAFragment *left = ast2nfa_fragment(ast->data.AstAnd.r1);
     decrease_state_counts(); /* concatenate left end and right start */
-    NFAFragment *right = ast2nfa_fragment(ast->data->and.r2);
+    NFAFragment *right = ast2nfa_fragment(ast->data.AstAnd.r2);
     move_edges(left->nfa, right->nfa);
     free(right->nfa);
     NFAFragment *result =
@@ -97,8 +97,8 @@ static NFAFragment *ast2nfa_fragment(Ast *ast) {
      */
     NFA *nfa = new_nfa();
     State start = increase_state_counts();
-    NFAFragment *left = ast2nfa_fragment(ast->data->or.r1);
-    NFAFragment *right = ast2nfa_fragment(ast->data->or.r2);
+    NFAFragment *left = ast2nfa_fragment(ast->data.AstOr.r1);
+    NFAFragment *right = ast2nfa_fragment(ast->data.AstOr.r2);
     State accept = increase_state_counts();
     add_epsilon(nfa, start, left->start);
     add_epsilon(nfa, start, right->start);
@@ -124,7 +124,7 @@ static NFAFragment *ast2nfa_fragment(Ast *ast) {
      */
     NFA *nfa = new_nfa();
     State start = increase_state_counts();
-    NFAFragment *body = ast2nfa_fragment(ast->data->repeat.r);
+    NFAFragment *body = ast2nfa_fragment(ast->data.AstRepeat.r);
     State accept = increase_state_counts();
     move_edges(nfa, body->nfa);
     add_epsilon(nfa, start, body->start);
@@ -139,7 +139,7 @@ static NFAFragment *ast2nfa_fragment(Ast *ast) {
 
   case SurroundNode: {
     /* START --r--> END */
-    return ast2nfa_fragment(ast->data->surround.r);
+    return ast2nfa_fragment(ast->data.AstSurround.r);
   }
 
   default:
