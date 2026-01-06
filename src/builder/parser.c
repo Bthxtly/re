@@ -43,8 +43,8 @@ static Ast *parse_range(Parser *parser);
  */
 static Ast *parse_expr(Parser *parser) {
   Ast *node = parse_term(parser);
-  while (parser->current_token->type == OR) {
-    eat(parser, OR);
+  while (parser->current_token->type == BAR) {
+    eat(parser, BAR);
     Ast *right = parse_term(parser);
     node = new_ast_or(node, right);
   }
@@ -68,16 +68,16 @@ static Ast *parse_term(Parser *parser) {
 }
 
 /*
- * factor := base ('*')
- *           base ('+')
+ * factor := base '*'
+ *           base '+'
  */
 static Ast *parse_factor(Parser *parser) {
   Ast *node = parse_base(parser);
-  if (parser->current_token->type == REPEAT) {
-    eat(parser, REPEAT);
+  if (parser->current_token->type == ASTERISK) {
+    eat(parser, ASTERISK);
     node = new_ast_repeat(node);
-  } else if (parser->current_token->type == ONE_OR_MORE) {
-    eat(parser, ONE_OR_MORE);
+  } else if (parser->current_token->type == PLUS) {
+    eat(parser, PLUS);
     node = new_ast_and(clone_ast(node), new_ast_repeat(node));
   }
   return node;

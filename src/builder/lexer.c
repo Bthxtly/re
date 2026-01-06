@@ -12,9 +12,9 @@ typedef enum TokenType {
   CARET,
   DASH,
   DOT,
-  ONE_OR_MORE,
-  REPEAT,
-  OR,
+  PLUS,
+  ASTERISK,
+  BAR,
   LITERAL,
   END
 } TokenType;
@@ -78,13 +78,13 @@ Token *get_next_token(Lexer *lexer) {
     lexer->current_token = new_token(DOT, '.');
     break;
   case '+':
-    lexer->current_token = new_token(ONE_OR_MORE, '+');
+    lexer->current_token = new_token(PLUS, '+');
     break;
   case '*':
-    lexer->current_token = new_token(REPEAT, '*');
+    lexer->current_token = new_token(ASTERISK, '*');
     break;
   case '|':
-    lexer->current_token = new_token(OR, '|');
+    lexer->current_token = new_token(BAR, '|');
     break;
   default:
     lexer->current_token = new_token(LITERAL, current_char);

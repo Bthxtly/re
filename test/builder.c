@@ -7,20 +7,20 @@ void tokenize() {
   char *pattern = "fo(o|ba*r)*baz";
   Lexer *lexer = new_lexer(pattern);
   TokenType types[] = {
-      LITERAL, /* f */
-      LITERAL, /* o */
-      LPAREN,  /* ( */
-      LITERAL, /* o */
-      OR,      /* | */
-      LITERAL, /* b */
-      LITERAL, /* a */
-      REPEAT,  /* * */
-      LITERAL, /* r */
-      RPAREN,  /* ) */
-      REPEAT,  /* * */
-      LITERAL, /* b */
-      LITERAL, /* a */
-      LITERAL, /* z */
+      LITERAL,  /* f */
+      LITERAL,  /* o */
+      LPAREN,   /* ( */
+      LITERAL,  /* o */
+      BAR,      /* | */
+      LITERAL,  /* b */
+      LITERAL,  /* a */
+      ASTERISK, /* * */
+      LITERAL,  /* r */
+      RPAREN,   /* ) */
+      ASTERISK, /* * */
+      LITERAL,  /* b */
+      LITERAL,  /* a */
+      LITERAL,  /* z */
   };
   size_t i = 0;
   Token *token;
