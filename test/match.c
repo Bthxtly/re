@@ -95,6 +95,13 @@ void extended_rules() {
   assert(!build_and_match("[abc]", "d"));
   assert(build_and_match("[^abc]", "d"));
   assert(!build_and_match("[^abc]", "b"));
+  /* back slash */
+  assert(build_and_match(".\\+", "a+"));
+  assert(build_and_match(".\\*", "b*"));
+  assert(build_and_match("[a-z\\[\\]]+", "a]b[c]"));
+  assert(build_and_match(".\\.", "c."));
+  assert(!build_and_match(".\\+", "abc"));
+  assert(build_and_match("\\n", "\n"));
 }
 
 int main(int argc, char *argv[]) {

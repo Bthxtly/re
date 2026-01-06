@@ -31,6 +31,29 @@ static void eat(Parser *parser, TokenType type) {
   }
 }
 
+static char eat_escape_char(Parser *parser) {
+  eat(parser, BACK_SLASH);
+  char value;
+  switch (parser->current_token->value) {
+  case 'a': /* beep */
+    value = '\a';
+    break;
+  case 'n': /* newline */
+    value = '\n';
+    break;
+  case 'r': /* carriage return */
+    value = '\r';
+    break;
+  case 't': /* tab */
+    value = '\t';
+    break;
+  default:
+    value = parser->current_token->value;
+  }
+  parser->current_token = get_next_token(parser->lexer);
+  return value;
+}
+
 /* Forward declarations */
 static Ast *parse_expr(Parser *parser);
 static Ast *parse_term(Parser *parser);
@@ -60,7 +83,8 @@ static Ast *parse_term(Parser *parser) {
          parser->current_token->type == CARET ||
          parser->current_token->type == DOT ||
          parser->current_token->type == LBRACKET ||
-         parser->current_token->type == LPAREN) {
+         parser->current_token->type == LPAREN ||
+         parser->current_token->type == BACK_SLASH) {
     Ast *right = parse_factor(parser);
     node = new_ast_and(node, right);
   }
@@ -85,6 +109,7 @@ static Ast *parse_factor(Parser *parser) {
 
 /*
  * base := LITERAL | CARET
+ *       | BACK_SLASH any_single_character
  *       | DOT
  *       | '[' range ']'
  *       | '(' expr ')'
@@ -100,6 +125,9 @@ static Ast *parse_base(Parser *parser) {
     char value = parser->current_token->value;
     eat(parser, CARET);
     return new_ast_literal(value);
+  }
+  case BACK_SLASH: {
+    return new_ast_literal(eat_escape_char(parser));
   }
   case DOT: {
     /* anything but newline */
@@ -131,6 +159,7 @@ static Ast *parse_base(Parser *parser) {
  * range or set
  * range := CARET
  *        | LITERAL
+ *        | BACK_SLASH any_single_character
  *        | LITERAL DASH LITERAL
  *        | range
  */
@@ -144,20 +173,24 @@ static Ast *parse_range(Parser *parser) {
 
   Vector_char *set = new_vector_char();
   while (parser->current_token->type != RBRACKET) {
-    char from = parser->current_token->value;
-    eat(parser, LITERAL);
-    Ast *right;
-    /* range */
-    if (parser->current_token->type == DASH) {
-      eat(parser, DASH);
-      char to = parser->current_token->value;
+    if (parser->current_token->type == BACK_SLASH) {
+      push_vector_char(set, eat_escape_char(parser));
+    } else {
+      char from = parser->current_token->value;
       eat(parser, LITERAL);
-      for (char c = from; c <= to; ++c)
-        push_vector_char(set, c);
+      Ast *right;
+      /* range */
+      if (parser->current_token->type == DASH) {
+        eat(parser, DASH);
+        char to = parser->current_token->value;
+        eat(parser, LITERAL);
+        for (char c = from; c <= to; ++c)
+          push_vector_char(set, c);
+      }
+      /* set */
+      else
+        push_vector_char(set, from);
     }
-    /* set */
-    else
-      push_vector_char(set, from);
   }
   return new_ast_set(set, is_neg);
 }

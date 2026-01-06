@@ -12,10 +12,11 @@ Support some regular expression rules:
 | r<sub>1</sub>r<sub>2</sub>   | And         |
 | r<sub>1</sub>\|r<sub>2</sub> | Or          |
 | r*                           | Repeat      |
-| +*                           | One Or More |
+| r+                           | One Or More |
 | \(r\)                        | Group       |
 | .                            | Dot         |
 | \[^abc0-9\]                  | Range       |
+| \\.                          | Escape      |
 
 ## Usage
 Refer to [this test file](test/match.c).

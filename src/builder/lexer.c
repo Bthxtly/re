@@ -15,6 +15,7 @@ typedef enum TokenType {
   PLUS,
   ASTERISK,
   BAR,
+  BACK_SLASH,
   LITERAL,
   END
 } TokenType;
@@ -85,6 +86,9 @@ Token *get_next_token(Lexer *lexer) {
     break;
   case '|':
     lexer->current_token = new_token(BAR, '|');
+    break;
+  case '\\':
+    lexer->current_token = new_token(BACK_SLASH, '\\');
     break;
   default:
     lexer->current_token = new_token(LITERAL, current_char);
